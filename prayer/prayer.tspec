@@ -1,0 +1,306 @@
+Project:
+	PrayerBeat.org
+
+Objectives:
+	1. Enhance the prayer ministry of the church through software tools, systems, applications and plugins.
+	2. Create a resilient, global and multilingual prayer network primarily for use by Christians but available to be reused by people of other faiths.
+	3. This will be a running application using current and advancing DevOps practices.
+	4. Rich user experience with data visualizations, images and video as well as ports for church web pages, facebook, google gadgets, apps, etc.
+	5. 
+
+Principles:
+	sometimes people need each other to spur on prayer
+	prayer needs to be supported with intelligence (news, etc.)
+		blackboards provide a snapshot of the latest intelligence and state (agent oriented)
+		data visualization techniques are key here
+		spiritual mapping is on the release horizon
+	strategies and plans help people to stay on track because it gives them a purpose
+	those who participate in prayer can do many jobs (pray, provide feedback, coordinate, report)
+
+InfoModel:
+	Meta
+		dt // creation timestamp 
+		active // is this node active? true or false
+		visibility (private, group, public) // visibility of node
+		CREATED_BY => user 1 // link to user who created the node
+		NOTE => note * // notes associated with node
+
+	Prayer
+		&meta
+		body // the prayer itself 
+		IMAGE => image * // images associated with the prayer
+		INSPIRED_BY => intelligence | prayer | scripture * // inspiration for prayer
+		PART_OF => activity | focus * // identify the activities and foci associated
+		AMEN => user * // show user support for the prayer
+		ADDRESSED_LIE => lie * // identify lies being addressed by the prayer
+
+	Scripture
+		&meta
+		text // the text of scripture being cited
+		reference // common biblical citation (e.g. 1 Cor. 2.1-3)
+
+	Lie
+		&meta
+		description // simple, concise description of an enemy lie
+		STRATEGY => strategy * // connected strategies for addressing the lie
+		PARENT_LIE => lie * // link to parent lie if one exists
+		COUNTER_TRUTH => scripture + // scriptures that reveal the falsehood of the lie
+
+	Strategy
+		&meta
+		objective // clear, concise statement of what is sought
+		MOTIVATION => lie | order | focus * // what brought objectve into focus
+		PLAN_OPTION => plan + // optional plans, ranked according to preference
+		PARENT_STRATEGY => strategy 01 // identifies parent strategy
+		expectedResults // describes the expected outcome(s)
+		startDt // dt when this strategy will go into effect <mature>
+		endDt // dt when the strategy will sunset <mature>
+		DEPLOYED => group * // identify groups that are affected by this strategy
+		COMMAND => group 01 // identify the group responsible for execution
+
+	Plan
+		&meta
+		details // details of the plan
+		perceivedCoverage // an estimate of how much coverage of the strategy the plan will achieve
+		expectedCasualties // estimate of expected losses due to implementation
+		expectedDuration // estimated duration that the plan will be in effect
+		expectedResources // estimate of resources required
+		availability // how long until the plan could become actionable
+		rank // how does this plan match up against other options
+
+	Image
+		&meta
+		url // url of the stored image
+
+	Activity
+		&meta
+		PARTICIPANT => user | group * // users and groups associated wit this activity
+		TYPE => activityType 1 // activity type (e.g. fasting)
+		name // short, concise activity name
+		FOCUS => focus * // linked foci of the activity
+		CONTEXT => lie * // the lies that are being addressed by this activity
+
+	ActivityType
+		&meta
+		name (e.g. fasting, convocation, project) // short activity type name
+		basis // a description of what this activity type is precisely
+
+	Focus/Situation
+		&meta
+		name // short, concise name of the focus or situation
+		reason // apparent reason for the situation
+		apparentReality // apparent reality that brought on the situation
+		CONTEXT => lie * // the lies that are linked to the focus or situation
+
+	Note
+		&meta
+		body // the textual body of the note
+
+	Group
+		&meta
+		LEAD => user + // the user(s) assigned to lead the group
+		name // short, concise name of group
+		purpose // a clear statement of the group's purpose
+		MEMBERSHIP_TYPE => membershipType 1 // what type of membership will be used
+		MEMBER => user | group * // users and groups that are members
+		TYPE => groupType 1 // type of group
+
+	GroupType
+		&meta
+		name (e.g. command, warrior, watchman, scout) // short, concise name of group type
+		basis  // a description of what this group type is
+
+	MembershipType
+		&meta
+		name (e.g. open, moderated, closed) // short, concise name of membership type
+		basis // a description of what this membership type is
+
+	Order
+		&meta
+		body // the textual body of the order
+		TRACED_TO => order * // orders that this order can be traced to
+		GIVEN_TO => group * // groups that received the order
+		CONTEXT => lie * // lies that the order addresses
+
+	User
+		&meta
+		name // short, concise name of user
+		handle // user name used in the system (not shown in anonymous mode)
+		MEMBER => group * // groups this user is a member of
+
+	Intelligence
+		&meta
+		url // URL of the intelligence being cited
+		callToAction // an estimate of the apparent requisite response
+		classification // an assessment of the sensitivity and impact of the information
+		CONTEXT => lie * // lies that the order addresses
+
+	Blackboards
+		&meta
+		PRAYER => prayer * // found prayers matching the criteria
+		INTEL => intelligence * // found intel matching the criteria
+		SCRIPTURE => scripture * // scriptures that might be informative
+		purpose // clear, concise statement of the purpose of this blackboard
+		QUERY_DEF => queryDefinition + // queries associated with this blackboard
+		VIEWER => user | group * // viewers of this blackboard
+		ACTIVITY => activity * // found activities matching the criteria
+
+	QueryDefinition
+		&meta
+		query (e.g. Cypher query) // query containing key words and relationships
+
+	Horizon:
+		Intelligence:
+			spiritual mapping:
+				historical context
+				geographic highlights
+				cultural context
+				current spiritual landscape
+				identification of impediments and barriers
+
+Fun:
+	UserBadges:
+		POET
+		WARRIOR_POET
+		WARRIOR
+		INTERCESSOR
+		WATCHMAN
+		SCOUT
+		SPY
+	Visualizations:
+		TreeMap // identify hot spots and review prayers
+		
+UseCases:
+	home page
+		user opens site
+		general home page is shown
+			site information
+			what it's about
+			power of prayer
+			trends..
+			hotspots
+		user authenticates
+			added queries to:
+				groups
+				prayers
+				feedback
+				blackboards
+				
+	standard prayer
+		user authenticates
+		goes to prayer area
+		reads/reviews prayers
+		enters a new prayer
+			enters prayer data and images
+			identifies visibility
+			[emit NEW_PRAYER message]
+			returns to prayer dashboard
+		extends an existing prayer
+			enters prayer data and images
+			identifies visibility
+			[emit EXTENDED_PRAYER message]
+			return to prayer dashboard
+		adds amen
+			select amen
+			[emit AMEN message]
+
+	update feedback
+		
+	
+	blackboards
+		user authenticates
+		goes to blackboards area
+		define a blackboard
+			create a new blackboard definition
+			enter blackboard data
+			define query information
+				create query
+				add query data
+				show sample result
+				return to blackboard definition
+		alter a blackboard
+		delete a blackboard
+		
+	update blackboard
+		[blackboard agent:
+			select a dashboard to update
+			update blackboard queries based on query definitions
+			remove stale queries
+		]
+	
+	notifications
+	
+	update badges
+		[badges agent:
+			emit NEW_BADGE message
+		]
+
+Messaging:
+	message handling
+		NEW_PRAYER
+		EXTENDED_PRAYER
+		AMEN
+		NEW_BADGE
+		
+Processes:
+	Blackboard maintenance:
+	Dashboard maintenance:
+	
+
+TechModel:
+	Configuration:
+		Versioning:
+			AWS:CodeCommit
+		Environments:
+			AWS:CloudFormation
+			AWS:OpsWorks
+			AWS:Config
+	UI:
+		Software:
+			AngularJS:
+				Security:
+			Swift:
+				Security:
+		Platform:
+			Firefox:
+				Security:
+					HTTPS
+			Chrome:
+				Security:
+					HTTPS
+			Safari:
+				Security:
+					HTTPS
+	Middle:
+		Messaging:
+			AWS:SQS:
+				Security:
+					AWS:IAM
+			AWS:SNS:
+				Security:
+					AWS:IAM
+		API:
+			AWS:APIGateway:
+				Security:
+					AWS:IAM
+		Service:
+			AWS:Lambda:
+				Security:
+					AWS:IAM
+	Database:
+		Software:
+			Neo4J:
+				Security:
+					Neo4J:Auth
+		Platform:
+			AWS:EC2:
+				Security:
+					AWS:IAM
+					AWS:ACL
+			AWS:EBS:
+				Security:
+					AWS:IAM
+			AWS:VPC:
+				Security:
+					AWS:IAM
+					AWS:SecurityGroup
